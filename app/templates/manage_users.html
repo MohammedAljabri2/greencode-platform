@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Manage Users - GreenCode Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-top: 0; color: #1f7a5a;">👥 User Management</h2>
+    <p style="color: #555;">Admin only — change user roles (FR-14).</p>
+
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>Current Role</th>
+            <th>Joined</th>
+            <th>Change Role</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td><strong>{{ user.username }}</strong></td>
+            <td>
+                {% if user.role == 'ADMIN' %}
+                    <span class="badge badge-admin">{{ user.role }}</span>
+                {% elif user.role == 'PROJECT_MANAGER' %}
+                    <span class="badge badge-manager">{{ user.role }}</span>
+                {% else %}
+                    <span class="badge badge-dev">{{ user.role }}</span>
+                {% endif %}
+            </td>
+            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('main.change_role', user_id=user.id) }}"
+                      style="display: flex; gap: 8px; margin: 0; align-items: center;">
+                    <select name="role" style="width: auto; margin: 0;">
+                        <option value="DEVELOPER"       {% if user.role == 'DEVELOPER' %}selected{% endif %}>Developer</option>
+                        <option value="PROJECT_MANAGER" {% if user.role == 'PROJECT_MANAGER' %}selected{% endif %}>Manager</option>
+                        <option value="ADMIN"           {% if user.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

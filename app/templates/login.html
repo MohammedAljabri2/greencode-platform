@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Login - GreenCode Platform{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 480px; margin: 40px auto;">
+    <h2 style="margin-top: 0; color: #1f7a5a;">🔐 Login</h2>
+    <p style="color: #555; margin-bottom: 20px;">Sign in to access GreenCode Platform.</p>
+
+    <form method="POST">
+        <label>Username</label>
+        <input type="text" name="username" required autofocus>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px; color: #555;">
+        Don't have an account?
+        <a href="{{ url_for('main.register_user') }}" style="color: #1f7a5a; font-weight: bold;">Register here</a>
+    </p>
+
+    <div style="background: #f0f7f4; padding: 12px; border-radius: 8px; margin-top: 20px; font-size: 13px; color: #355;">
+        <strong>Demo accounts:</strong><br>
+        admin / admin123 (Administrator)<br>
+        developer / dev123 (Developer)<br>
+        manager / manager123 (Project Manager)
+    </div>
+</div>
+{% endblock %}

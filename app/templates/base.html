@@ -1,0 +1,155 @@
+{# GreenCode Platform - Base Template (NFR-03 Usability) #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GreenCode Platform{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f7f7;
+            color: #233;
+        }
+        header {
+            background: #1f7a5a;
+            color: white;
+            padding: 20px 30px;
+        }
+        header h1 { margin: 0 0 4px; }
+        header p { margin: 0; opacity: 0.9; }
+        nav {
+            background: #17352d;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        nav .nav-left a, nav .nav-right a {
+            color: white;
+            text-decoration: none;
+            margin-right: 16px;
+            font-weight: bold;
+        }
+        nav .nav-right { display: flex; align-items: center; gap: 12px; }
+        nav .nav-user {
+            color: #b8e0c8;
+            font-size: 0.9em;
+            margin-right: 8px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 25px auto;
+        }
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #1f7a5a;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-blue { background: #2563eb; }
+        .btn-red { background: #b91c1c; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        label { font-weight: bold; color: #355; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            border-bottom: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th { background: #f0f7f4; color: #17352d; }
+        .flash {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .success { background: #dcfce7; color: #166534; }
+        .danger  { background: #fee2e2; color: #991b1b; }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-admin   { background: #fee2e2; color: #991b1b; }
+        .badge-manager { background: #fef3c7; color: #92400e; }
+        .badge-dev     { background: #dbeafe; color: #1e40af; }
+        .badge-high   { background: #fee2e2; color: #991b1b; }
+        .badge-medium { background: #fef3c7; color: #92400e; }
+        .badge-low    { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌿 GreenCode Platform</h1>
+        <p>Sustainability Analysis for Source Code</p>
+    </header>
+
+    <nav>
+        <div class="nav-left">
+            {% if current_user %}
+                <a href="{{ url_for('main.dashboard') }}">Home</a>
+                <a href="{{ url_for('main.upload_project') }}">Upload Project</a>
+                <a href="{{ url_for('main.compare_versions') }}">Compare</a>
+                {% if current_user.role == 'ADMIN' %}
+                    <a href="{{ url_for('main.manage_users') }}">Manage Users</a>
+                    <a href="{{ url_for('main.view_logs') }}">Activity Logs</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('main.login') }}">Login</a>
+                <a href="{{ url_for('main.register_user') }}">Register</a>
+            {% endif %}
+        </div>
+        <div class="nav-right">
+            {% if current_user %}
+                <span class="nav-user">👤 {{ current_user.username }} ({{ current_user.role }})</span>
+                <a href="{{ url_for('main.logout') }}">Logout</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

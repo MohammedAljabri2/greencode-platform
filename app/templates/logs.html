@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Activity Logs - GreenCode Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-top: 0; color: #1f7a5a;">📋 Activity Logs</h2>
+    <p style="color: #555;">Audit trail of user actions (FR-15). Showing the most recent 200 entries.</p>
+
+    {% if logs %}
+    <table>
+        <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Details</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td style="font-family: monospace; font-size: 0.9em;">
+                {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+            </td>
+            <td><strong>{{ log.user.username }}</strong></td>
+            <td><span class="badge badge-dev">{{ log.action }}</span></td>
+            <td>{{ log.details }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p style="color: #777;">No activity recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

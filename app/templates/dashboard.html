@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - GreenCode Platform{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-top: 0;">👋 Welcome, {{ current_user.username }}!</h2>
+    <p style="color: #555;">
+        You are logged in as
+        {% if current_user.role == 'ADMIN' %}
+            <span class="badge badge-admin">{{ current_user.role }}</span>
+        {% elif current_user.role == 'PROJECT_MANAGER' %}
+            <span class="badge badge-manager">{{ current_user.role }}</span>
+        {% else %}
+            <span class="badge badge-dev">{{ current_user.role }}</span>
+        {% endif %}
+    </p>
+    <a href="{{ url_for('main.upload_project') }}" class="btn btn-blue">+ Upload New Project</a>
+    <a href="{{ url_for('main.compare_versions') }}" class="btn">Compare Versions</a>
+</div>
+
+{% if current_user.role == 'ADMIN' and users %}
+<div class="card">
+    <h2>All Users (Admin View)</h2>
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Joined</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>
+                {% if user.role == 'ADMIN' %}<span class="badge badge-admin">{{ user.role }}</span>
+                {% elif user.role == 'PROJECT_MANAGER' %}<span class="badge badge-manager">{{ user.role }}</span>
+                {% else %}<span class="badge badge-dev">{{ user.role }}</span>{% endif %}
+            </td>
+            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>
+        {% if current_user.has_role('PROJECT_MANAGER') %}All Projects{% else %}My Projects{% endif %}
+    </h2>
+    {% if projects %}
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Created</th>
+            <th>Versions</th>
+        </tr>
+        {% for project in projects %}
+        <tr>
+            <td><strong>{{ project.name }}</strong></td>
+            <td>{{ project.owner.username }}</td>
+            <td>{{ project.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ project.versions|length }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p style="color: #777;">No projects yet. Click "Upload New Project" to get started.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Recent Analysis Runs</h2>
+    {% if analyses %}
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Score</th>
+            <th>Status</th>
+            <th>Started</th>
+            <th>Report</th>
+        </tr>
+        {% for analysis in analyses %}
+        <tr>
+            <td>#{{ analysis.id }}</td>
+            <td><strong>{{ analysis.overall_score }}/100</strong></td>
+            <td>{{ analysis.status }}</td>
+            <td>{{ analysis.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td><a class="btn btn-sm" href="{{ url_for('main.view_report', analysis_id=analysis.id) }}">Open</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p style="color: #777;">No analyses yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

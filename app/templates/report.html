@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Report - GreenCode Platform{% endblock %}
+
+{% block content %}
+{# Determine score band for colouring the circle #}
+{% set score = analysis.overall_score or 0 %}
+{% if score >= 75 %}
+    {% set score_color = "#16a34a" %}
+    {% set score_bg = "#dcfce7" %}
+    {% set score_label = "Excellent" %}
+{% elif score >= 50 %}
+    {% set score_color = "#d97706" %}
+    {% set score_bg = "#fef3c7" %}
+    {% set score_label = "Moderate" %}
+{% else %}
+    {% set score_color = "#b91c1c" %}
+    {% set score_bg = "#fee2e2" %}
+    {% set score_label = "Needs Attention" %}
+{% endif %}
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <h2 style="margin: 0; color: #1f7a5a;">🌿 Sustainability Report</h2>
+            <p style="margin: 4px 0 0; color: #555;">
+                <strong>{{ project.name }}</strong> &middot;
+                Version <strong>{{ version.version_label }}</strong> &middot;
+                {{ analysis.started_at.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+        </div>
+        <a href="{{ url_for('main.dashboard') }}" class="btn">← Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap;">
+        <div style="width: 180px; height: 180px; border-radius: 50%;
+                    background: {{ score_bg }}; color: {{ score_color }};
+                    display: flex; flex-direction: column; justify-content: center;
+                    align-items: center; border: 6px solid {{ score_color }};">
+            <div style="font-size: 3em; font-weight: bold; line-height: 1;">{{ score }}</div>
+            <div style="font-size: 0.9em; margin-top: 4px;">/ 100</div>
+        </div>
+        <div style="flex: 1; min-width: 280px;">
+            <h3 style="margin: 0 0 12px; color: {{ score_color }};">{{ score_label }}</h3>
+            <p style="margin: 0;">
+                {% if score >= 75 %}
+                    Your code follows energy-efficient practices well. Keep iterating on minor issues.
+                {% elif score >= 50 %}
+                    Several optimisations could meaningfully reduce energy consumption. Review the findings below.
+                {% else %}
+                    Significant energy-waste patterns were detected. Address the High-severity smells first.
+                {% endif %}
+            </p>
+            <p style="margin: 12px 0 0; color: #555;">
+                <strong>Status:</strong> {{ analysis.status }} &middot;
+                <strong>Total Smells:</strong> {{ smells|length }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-top: 0;">Severity Breakdown</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+        <div style="background: #fee2e2; padding: 20px; border-radius: 10px; border-left: 4px solid #b91c1c;">
+            <div style="font-size: 0.8em; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">High</div>
+            <div style="font-size: 2.2em; font-weight: bold; color: #b91c1c;">{{ high_count }}</div>
+        </div>
+        <div style="background: #fef3c7; padding: 20px; border-radius: 10px; border-left: 4px solid #d97706;">
+            <div style="font-size: 0.8em; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Medium</div>
+            <div style="font-size: 2.2em; font-weight: bold; color: #d97706;">{{ medium_count }}</div>
+        </div>
+        <div style="background: #dbeafe; padding: 20px; border-radius: 10px; border-left: 4px solid #1e40af;">
+            <div style="font-size: 0.8em; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">Low</div>
+            <div style="font-size: 2.2em; font-weight: bold; color: #1e40af;">{{ low_count }}</div>
+        </div>
+    </div>
+</div>
+
+{% if smells|length == 0 %}
+<div class="card" style="text-align: center;">
+    <h3 style="color: #16a34a; margin-top: 0;">🎉 No Energy Smells Detected</h3>
+    <p style="color: #555;">Your code is clean from the patterns our analyzer checks for.</p>
+</div>
+{% else %}
+    {% for severity in ['High', 'Medium', 'Low'] %}
+        {% if smells_by_severity[severity] %}
+        <div class="card">
+            <h3 style="margin-top: 0;">
+                {% if severity == 'High' %}
+                    <span class="badge badge-high">High Severity</span>
+                {% elif severity == 'Medium' %}
+                    <span class="badge badge-medium">Medium Severity</span>
+                {% else %}
+                    <span class="badge badge-low">Low Severity</span>
+                {% endif %}
+                <span style="color: #555; font-weight: normal; font-size: 0.85em; margin-left: 10px;">
+                    {{ smells_by_severity[severity]|length }} finding(s)
+                </span>
+            </h3>
+
+            <table>
+                <tr>
+                    <th>Smell Type</th>
+                    <th>File</th>
+                    <th>Line</th>
+                    <th>Reason</th>
+                </tr>
+                {% for smell in smells_by_severity[severity] %}
+                <tr>
+                    <td><strong>{{ smell.smell_type }}</strong></td>
+                    <td><code style="font-size: 0.9em;">{{ smell.file_path }}</code></td>
+                    <td style="text-align: center;">{{ smell.line_start }}</td>
+                    <td>{{ smell.reason }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{% if suggestions %}
+<div class="card">
+    <h3 style="margin-top: 0;">💡 Refactoring Suggestions</h3>
+    <ul style="padding-left: 0; list-style: none;">
+        {% for s in suggestions %}
+        <li style="background: #f0f7f4; padding: 14px 16px; border-radius: 8px;
+                   margin-bottom: 10px; border-left: 4px solid #1f7a5a;">
+            <strong style="color: #1f7a5a;">{{ s.title }}</strong><br>
+            <span style="color: #355;">{{ s.description }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
